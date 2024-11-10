@@ -9,7 +9,6 @@ import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
@@ -48,10 +47,10 @@ function ResponsiveAppBar() {
     };
 
     return (
-        <AppBar position="static">
+        <AppBar position="static" sx={{ backgroundColor: '#333', boxShadow: 'none' }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+                    <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, color: '#fff' }} />
                     <Typography
                         variant="h6"
                         noWrap
@@ -60,16 +59,18 @@ function ResponsiveAppBar() {
                         sx={{
                             mr: 2,
                             display: { xs: 'none', md: 'flex' },
-                            fontFamily: 'monospace',
+                            fontFamily: 'Roboto, sans-serif',
                             fontWeight: 700,
                             letterSpacing: '.3rem',
-                            color: 'inherit',
+                            color: '#fff',
                             textDecoration: 'none',
+                            '&:hover': { color: '#007bff' },
                         }}
                     >
                         LOGO
                     </Typography>
 
+                    {/* Mobile Menu */}
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                         <IconButton
                             size="large"
@@ -99,41 +100,28 @@ function ResponsiveAppBar() {
                         >
                             {pages.map((page, index) => (
                                 <MenuItem key={page} onClick={() => handlePageClick(index)}>
-                                    <Typography sx={{ textAlign: 'center' }}>{page}</Typography>
+                                    <Typography sx={{ textAlign: 'center', color: '#333' }}>{page}</Typography>
                                 </MenuItem>
                             ))}
                         </Menu>
                     </Box>
-                    <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-                    <Typography
-                        variant="h5"
-                        noWrap
-                        component="a"
-                        href="#app-bar-with-responsive-menu"
-                        sx={{
-                            mr: 2,
-                            display: { xs: 'flex', md: 'none' },
-                            flexGrow: 1,
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            letterSpacing: '.3rem',
-                            color: 'inherit',
-                            textDecoration: 'none',
-                        }}
-                    >
-                        LOGO
-                    </Typography>
+
+                    {/* Desktop Menu */}
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {pages.map((page, index) => (
                             <MenuItem key={page} onClick={() => handlePageClick(index)}>
-                                <Typography sx={{ textAlign: 'center' }}>{page}</Typography>
+                                <Typography sx={{ textAlign: 'center', color: '#fff', '&:hover': { color: '#007bff' } }}>
+                                    {page}
+                                </Typography>
                             </MenuItem>
                         ))}
                     </Box>
+
+                    {/* User Menu */}
                     <Box sx={{ flexGrow: 0 }}>
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                                <Avatar alt="User Avatar" src="/static/images/avatar/2.jpg" />
                             </IconButton>
                         </Tooltip>
                         <Menu
@@ -153,7 +141,7 @@ function ResponsiveAppBar() {
                             onClose={handleCloseUserMenu}
                         >
                             <MenuItem onClick={handleLogout}>
-                                <Typography sx={{ textAlign: 'center' }}>LogOut</Typography>
+                                <Typography sx={{ textAlign: 'center', color: '#333' }}>LogOut</Typography>
                             </MenuItem>
                         </Menu>
                     </Box>
