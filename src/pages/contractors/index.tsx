@@ -1,115 +1,108 @@
-import React, { useState } from 'react';
-import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField, MenuItem, Select, InputLabel, FormControl, Button, SelectChangeEvent, Paper, Typography, Box, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import {
+  Container,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Button,
+  SelectChangeEvent,
+  Paper,
+  Typography,
+  Box,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  CircularProgress,
+} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-const sampleData = [
-  {
-    title: "Tender 1",
-    description: "Detailed description about tender 1",
-    visibility: "public",
-    invited_suppliers: ["supplier1@example.com", "supplier2@example.com"],
-    create_at: "2024-11-10",
-  },
-  {
-    title: "Tender 2",
-    description: "Detailed description about tender 2",
-    visibility: "private",
-    invited_suppliers: ["supplier3@example.com"],
-    create_at: "2024-11-09",
-  },
-  {
-    title: "Tender 3",
-    description: "Detailed description about tender 3",
-    visibility: "public",
-    invited_suppliers: ["supplier1@example.com"],
-    create_at: "2024-11-08",
-  },
-  {
-    title: "Tender 4",
-    description: "Detailed description about tender 4",
-    visibility: "private",
-    invited_suppliers: ["supplier4@example.com", "supplier5@example.com"],
-    create_at: "2024-11-07",
-  },
-  {
-    title: "Tender 5",
-    description: "Detailed description about tender 5",
-    visibility: "public",
-    invited_suppliers: ["supplier2@example.com"],
-    create_at: "2024-11-06",
-  },
-  {
-    title: "Tender 6",
-    description: "Detailed description about tender 6",
-    visibility: "private",
-    invited_suppliers: ["supplier6@example.com"],
-    create_at: "2024-11-05",
-  },
-  {
-    title: "Tender 7",
-    description: "Detailed description about tender 7",
-    visibility: "public",
-    invited_suppliers: ["supplier7@example.com", "supplier8@example.com"],
-    create_at: "2024-11-04",
-  },
-  {
-    title: "Tender 8",
-    description: "Detailed description about tender 8",
-    visibility: "private",
-    invited_suppliers: ["supplier9@example.com"],
-    create_at: "2024-11-03",
-  },
-  {
-    title: "Tender 9",
-    description: "Detailed description about tender 9",
-    visibility: "public",
-    invited_suppliers: ["supplier1@example.com", "supplier9@example.com"],
-    create_at: "2024-11-02",
-  },
-  {
-    title: "Tender 10",
-    description: "Detailed description about tender 10",
-    visibility: "private",
-    invited_suppliers: ["supplier10@example.com"],
-    create_at: "2024-11-01",
-  },
-];
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const ContractorsPage = () => {
-  const [data, setData] = useState(sampleData);
-  const [visibilityFilter, setVisibilityFilter] = useState<string>("all");
-  const [dateFilter, setDateFilter] = useState<string>("");
-  const [openDialog, setOpenDialog] = useState(false);  // Mở hoặc đóng hộp thoại
-  const [editDialogOpen, setEditDialogOpen] = useState(false);  // Hộp thoại chỉnh sửa
+  const [data, setData] = useState<any[]>([]); // Khởi tạo là một mảng rỗng
+  const [visibilityFilter, setVisibilityFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<string>('');
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
 
   const handleVisibilityChange = (event: SelectChangeEvent<string>) => {
     setVisibilityFilter(event.target.value);
   };
 
-  const handleDateChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setDateFilter(event.target.value as string);
+  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDateFilter(event.target.value);
   };
 
   const handleDelete = () => {
-    setOpenDialog(true);  // Mở hộp thoại xác nhận
+    setOpenDialog(true);
   };
 
   const confirmDelete = () => {
-    setOpenDialog(false);  // Mở hộp thoại xác nhận
-    console.log("Successfull")
+    setOpenDialog(false);
+    console.log('Successfully deleted');
   };
 
   const handleEdit = () => {
-    setEditDialogOpen(true);  // Mở hộp thoại chỉnh sửa
+    setEditDialogOpen(true);
     console.log('Editing item:');
   };
+
   const handleSaveEdit = () => {
     setEditDialogOpen(false);
-
   };
-  const filteredData = data.filter((item) => {
-    const matchesVisibility = visibilityFilter === "all" || item.visibility === visibilityFilter;
-    const matchesDate = dateFilter ? item.create_at === dateFilter : true;
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        setError('You need to log in to view this page.');
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await axios.get('http://localhost/api/tender', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Kiểm tra phản hồi từ API
+      console.log('API Response:', response.data);
+
+      // Dữ liệu nằm trong response.data.tenders
+      setData(response.data.tenders);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const filteredData = data.filter((item: any) => {
+    const matchesVisibility =
+      visibilityFilter === 'all' || item.visibility.toLowerCase() === visibilityFilter;
+    const matchesDate = dateFilter
+      ? item.created_at.substring(0, 10) === dateFilter
+      : true;
     return matchesVisibility && matchesDate;
   });
 
@@ -118,106 +111,139 @@ const ContractorsPage = () => {
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2, color: '#333' }}>
         Contractors
       </Typography>
-      <Box sx={{
-        backgroundColor: "#fff",
-        padding: '20px', 
-        borderRadius: "10px",
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',  // Bóng mờ màu xám nhạt
-        marginBottom: "10px"
-      }}
-        >      
+      <Box
+        sx={{
+          backgroundColor: '#fff',
+          padding: '20px',
+          borderRadius: '10px',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+          marginBottom: '10px',
+        }}
+      >
         <Box sx={{ display: 'flex', gap: '16px', mb: 2, alignItems: 'center' }}>
-        <FormControl variant="outlined" sx={{ minWidth: 150, fontSize: '14px' }} className='!p-[10px]'>
-          <InputLabel sx={{ fontSize: '14px' }}>Visibility</InputLabel>
-          <Select value={visibilityFilter} onChange={handleVisibilityChange} label="Visibility" sx={{ fontSize: '14px' }}>
-            <MenuItem value="all" sx={{ fontSize: '14px' }}>All</MenuItem>
-            <MenuItem value="public" sx={{ fontSize: '14px' }}>Public</MenuItem>
-            <MenuItem value="private" sx={{ fontSize: '14px' }}>Private</MenuItem>
-          </Select>
-        </FormControl>
+          <FormControl variant="outlined" sx={{ minWidth: 150, fontSize: '14px' }}>
+            <InputLabel sx={{ fontSize: '14px' }}>Visibility</InputLabel>
+            <Select
+              value={visibilityFilter}
+              onChange={handleVisibilityChange}
+              label="Visibility"
+              sx={{ fontSize: '14px' }}
+            >
+              <MenuItem value="all" sx={{ fontSize: '14px' }}>
+                All
+              </MenuItem>
+              <MenuItem value="public" sx={{ fontSize: '14px' }}>
+                Public
+              </MenuItem>
+              <MenuItem value="private" sx={{ fontSize: '14px' }}>
+                Private
+              </MenuItem>
+            </Select>
+          </FormControl>
 
-        <TextField
-          label="Filter by Date"
-          value={dateFilter}
-          onChange={handleDateChange}
-          variant="outlined"
-          type="date"
-          InputLabelProps={{ shrink: true, style: { fontSize: '14px' } }}
-          sx={{ fontSize: '14px', padding: '10px 10px' }}
-        />
+          <TextField
+            label="Filter by Date"
+            value={dateFilter}
+            onChange={handleDateChange}
+            variant="outlined"
+            type="date"
+            InputLabelProps={{ shrink: true, style: { fontSize: '14px' } }}
+            sx={{ fontSize: '14px', padding: '10px 10px' }}
+          />
 
-        <Button
-          variant="contained"
-          onClick={() => {
-            setVisibilityFilter("all");
-            setDateFilter("");
-          }}
-          sx={{
-            backgroundColor: '#3a539b',
-            height: '56px',
-            color: '#ffffff',
-            fontWeight: 600,
-            borderRadius: '5px',
-            '&:hover': {
-              backgroundColor: '#2f4477',
-            },
-          }}
-        >
-          Search
-        </Button>
-      </Box>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setVisibilityFilter('all');
+              setDateFilter('');
+            }}
+            sx={{
+              backgroundColor: '#3a539b',
+              height: '56px',
+              color: '#ffffff',
+              fontWeight: 600,
+              borderRadius: '5px',
+              '&:hover': {
+                backgroundColor: '#2f4477',
+              },
+            }}
+          >
+            Clear Filters
+          </Button>
+        </Box>
 
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#3a539b' }}>
-                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
-                  <TableSortLabel style={{ color: '#ffffff' }}>Title</TableSortLabel>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Description</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Visibility</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Invited Suppliers</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Created At</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Actions</TableCell> {/* Cột mới */}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredData.map((item, index) => (
-                <TableRow
-                  key={index}
-                  sx={{
-                    '&:nth-of-type(odd)': { backgroundColor: '#eaeaea' },
-                    '&:nth-of-type(even)': { backgroundColor: '#ffffff' },
-                    '&:hover': { backgroundColor: '#d5d5d5' },
-                    height: 56,
-                  }}
-                >
-                  <TableCell>{item.title}</TableCell>
-                  <TableCell>{item.description}</TableCell>
-                  <TableCell>{item.visibility}</TableCell>
-                  <TableCell>{item.invited_suppliers.join(', ')}</TableCell>
-                  <TableCell>{item.create_at}</TableCell>
-                  <TableCell>
-                    <Button onClick={() => handleEdit()} sx={{ mr: 1 }}>
-                      <EditIcon />
-                    </Button>
-                    <Button onClick={() => handleDelete()} color="error">
-                      <DeleteIcon />
-                    </Button>
-                  </TableCell> {/* Cột Action */}
+        {isLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Typography color="error" align="center">
+            {error}
+          </Typography>
+        ) : (
+          <TableContainer
+            component={Paper}
+            sx={{ borderRadius: 2, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#3a539b' }}>
+                  <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
+                    <TableSortLabel style={{ color: '#ffffff' }}>Title</TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
+                    Description
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
+                    Visibility
+                  </TableCell>
+                  {/* <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
+                    Invited Suppliers
+                  </TableCell> */}
+                  <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
+                    Created At
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
+                    Actions
+                  </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {filteredData.map((item: any, index: number) => (
+                  <TableRow
+                    key={index}
+                    sx={{
+                      '&:nth-of-type(odd)': { backgroundColor: '#eaeaea' },
+                      '&:nth-of-type(even)': { backgroundColor: '#ffffff' },
+                      '&:hover': { backgroundColor: '#d5d5d5' },
+                      height: 56,
+                    }}
+                  >
+                    <TableCell>{item.title}</TableCell>
+                    <TableCell>{item.description}</TableCell>
+                    <TableCell>{item.visibility}</TableCell>
+                    {/* <TableCell>{item.invited_suppliers?.join(', ')}</TableCell> */}
+                    <TableCell>{item.created_at.substring(0, 10)}</TableCell>
+                    <TableCell>
+                      <Button onClick={() => handleEdit()} sx={{ mr: 1 }}>
+                        <EditIcon />
+                      </Button>
+                      <Button onClick={() => handleDelete()} color="error">
+                        <DeleteIcon />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Box>
 
       {/* Hộp thoại xác nhận xóa */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          Are you sure you want to delete this tender?
-        </DialogContent>
+        <DialogContent>Are you sure you want to delete this tender?</DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)} color="primary">
             Cancel
@@ -228,42 +254,21 @@ const ContractorsPage = () => {
         </DialogActions>
       </Dialog>
 
-
       {/* Hộp thoại chỉnh sửa */}
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
         <DialogTitle>Edit Tender</DialogTitle>
         <DialogContent>
-          <TextField
-            label="Title"
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Description"
-            fullWidth
-            sx={{ mb: 2 }}
-
-          />
-          <TextField
-            label="Visibility	"
-            fullWidth
-            sx={{ mb: 2 }}
-
-          />
-          <TextField
-            label="Invited Suppliers	"
-            fullWidth
-            sx={{ mb: 2 }}
-
-          />
+          <TextField label="Title" fullWidth sx={{ mb: 2 }} />
+          <TextField label="Description" fullWidth sx={{ mb: 2 }} />
+          <TextField label="Visibility" fullWidth sx={{ mb: 2 }} />
+          {/* Bạn có thể thêm các trường khác nếu cần */}
           <TextField
             label="Date"
             type="date"
             fullWidth
             sx={{ mb: 2 }}
-
             InputLabelProps={{
-              shrink: true,  // Làm cho label luôn hiển thị khi có giá trị
+              shrink: true,
             }}
           />
         </DialogContent>
@@ -276,7 +281,6 @@ const ContractorsPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
     </Container>
   );
 };
