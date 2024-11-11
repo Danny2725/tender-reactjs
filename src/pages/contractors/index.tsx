@@ -30,13 +30,24 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const ContractorsPage = () => {
-  const [data, setData] = useState<any[]>([]); // Khởi tạo là một mảng rỗng
+  const [data, setData] = useState<any[]>([]); // Dữ liệu tender
   const [visibilityFilter, setVisibilityFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('');
   const [openDialog, setOpenDialog] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
+
+  // State cho tender đang được chỉnh sửa
+  const [selectedTender, setSelectedTender] = useState<any>(null);
+
+  // State cho các trường trong form chỉnh sửa
+  const [editTitle, setEditTitle] = useState<string>('');
+  const [editDescription, setEditDescription] = useState<string>('');
+  const [editVisibility, setEditVisibility] = useState<string>('Public');
+
+  // State cho tender cần xóa
+  const [tenderToDelete, setTenderToDelete] = useState<number | null>(null);
 
   const handleVisibilityChange = (event: SelectChangeEvent<string>) => {
     setVisibilityFilter(event.target.value);
@@ -46,24 +57,110 @@ const ContractorsPage = () => {
     setDateFilter(event.target.value);
   };
 
-  const handleDelete = () => {
+  // Hàm mở hộp thoại xác nhận xóa và lưu ID tender cần xóa
+  const handleDelete = (tenderId: number) => {
+    setTenderToDelete(tenderId);
     setOpenDialog(true);
   };
 
-  const confirmDelete = () => {
-    setOpenDialog(false);
-    console.log('Successfully deleted');
+  // Hàm xác nhận xóa tender
+  const confirmDelete = async () => {
+    if (tenderToDelete === null) return;
+
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        setError('You need to log in to perform this action.');
+        return;
+      }
+
+      // Gọi API xóa tender
+      await axios.delete(`http://localhost/api/tender/${tenderToDelete}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Cập nhật state để loại bỏ tender đã xóa
+      setData(data.filter(item => item.id !== tenderToDelete));
+
+      // Đóng hộp thoại và reset state
+      setOpenDialog(false);
+      setTenderToDelete(null);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to delete tender');
+    }
   };
 
-  const handleEdit = () => {
-    setEditDialogOpen(true);
-    console.log('Editing item:');
+  // Hàm gọi API để lấy thông tin tender và mở dialog chỉnh sửa
+  const handleEdit = async (tenderId: number) => {
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        setError('You need to log in to perform this action.');
+        return;
+      }
+
+      const response = await axios.get(`http://localhost/api/tender/${tenderId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const tender = response.data.tender;
+
+      // Cập nhật state với thông tin tender
+      setSelectedTender(tender);
+      setEditTitle(tender.title);
+      setEditDescription(tender.description);
+      setEditVisibility(tender.visibility);
+
+      // Mở dialog chỉnh sửa
+      setEditDialogOpen(true);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch tender details');
+    }
   };
 
-  const handleSaveEdit = () => {
-    setEditDialogOpen(false);
+  // Hàm lưu thay đổi sau khi chỉnh sửa
+  const handleSaveEdit = async () => {
+    if (!selectedTender) return;
+
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        setError('You need to log in to perform this action.');
+        return;
+      }
+
+      // Dữ liệu cập nhật gửi lên API
+      const updatedTender = {
+        title: editTitle,
+        description: editDescription,
+        visibility: editVisibility,
+      };
+
+      // Gửi yêu cầu cập nhật tender
+      await axios.put(`http://localhost/api/tender/${selectedTender.id}`, updatedTender, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Cập nhật dữ liệu trong state
+      const updatedData = data.map(item =>
+        item.id === selectedTender.id ? { ...item, ...updatedTender } : item
+      );
+      setData(updatedData);
+
+      // Đóng dialog
+      setEditDialogOpen(false);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to update tender');
+    }
   };
 
+  // Hàm lấy dữ liệu ban đầu
   const fetchData = async () => {
     setIsLoading(true);
     setError('');
@@ -81,10 +178,6 @@ const ContractorsPage = () => {
         },
       });
 
-      // Kiểm tra phản hồi từ API
-      console.log('API Response:', response.data);
-
-      // Dữ liệu nằm trong response.data.tenders
       setData(response.data.tenders);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch data');
@@ -120,6 +213,7 @@ const ContractorsPage = () => {
           marginBottom: '10px',
         }}
       >
+        {/* Bộ lọc */}
         <Box sx={{ display: 'flex', gap: '16px', mb: 2, alignItems: 'center' }}>
           <FormControl variant="outlined" sx={{ minWidth: 150, fontSize: '14px' }}>
             <InputLabel sx={{ fontSize: '14px' }}>Visibility</InputLabel>
@@ -172,6 +266,7 @@ const ContractorsPage = () => {
           </Button>
         </Box>
 
+        {/* Hiển thị bảng dữ liệu */}
         {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
             <CircularProgress />
@@ -197,9 +292,6 @@ const ContractorsPage = () => {
                   <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
                     Visibility
                   </TableCell>
-                  {/* <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
-                    Invited Suppliers
-                  </TableCell> */}
                   <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
                     Created At
                   </TableCell>
@@ -222,13 +314,12 @@ const ContractorsPage = () => {
                     <TableCell>{item.title}</TableCell>
                     <TableCell>{item.description}</TableCell>
                     <TableCell>{item.visibility}</TableCell>
-                    {/* <TableCell>{item.invited_suppliers?.join(', ')}</TableCell> */}
                     <TableCell>{item.created_at.substring(0, 10)}</TableCell>
                     <TableCell>
-                      <Button onClick={() => handleEdit()} sx={{ mr: 1 }}>
+                      <Button onClick={() => handleEdit(item.id)} sx={{ mr: 1 }}>
                         <EditIcon />
                       </Button>
-                      <Button onClick={() => handleDelete()} color="error">
+                      <Button onClick={() => handleDelete(item.id)} color="error">
                         <DeleteIcon />
                       </Button>
                     </TableCell>
@@ -243,9 +334,17 @@ const ContractorsPage = () => {
       {/* Hộp thoại xác nhận xóa */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>Are you sure you want to delete this tender?</DialogContent>
+        <DialogContent>
+          Are you sure you want to delete this tender?
+        </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="primary">
+          <Button
+            onClick={() => {
+              setOpenDialog(false);
+              setTenderToDelete(null);
+            }}
+            color="primary"
+          >
             Cancel
           </Button>
           <Button onClick={confirmDelete} color="error">
@@ -258,19 +357,33 @@ const ContractorsPage = () => {
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
         <DialogTitle>Edit Tender</DialogTitle>
         <DialogContent>
-          <TextField label="Title" fullWidth sx={{ mb: 2 }} />
-          <TextField label="Description" fullWidth sx={{ mb: 2 }} />
-          <TextField label="Visibility" fullWidth sx={{ mb: 2 }} />
-          {/* Bạn có thể thêm các trường khác nếu cần */}
           <TextField
-            label="Date"
-            type="date"
+            label="Title"
             fullWidth
             sx={{ mb: 2 }}
-            InputLabelProps={{
-              shrink: true,
-            }}
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
           />
+          <TextField
+            label="Description"
+            fullWidth
+            sx={{ mb: 2 }}
+            value={editDescription}
+            onChange={(e) => setEditDescription(e.target.value)}
+            multiline
+            rows={4}
+          />
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Visibility</InputLabel>
+            <Select
+              value={editVisibility}
+              onChange={(e) => setEditVisibility(e.target.value)}
+              label="Visibility"
+            >
+              <MenuItem value="Public">Public</MenuItem>
+              <MenuItem value="Private">Private</MenuItem>
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditDialogOpen(false)} color="primary">
