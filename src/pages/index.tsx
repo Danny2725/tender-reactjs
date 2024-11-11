@@ -1,4 +1,6 @@
 import * as React from 'react';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 import { Box, Button, TextField, Typography, Container, FormControl, InputLabel, Select, MenuItem, Snackbar, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,7 +8,7 @@ export default function TenderForm() {
   const navigate = useNavigate();
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
-  const [visibility, setVisibility] = React.useState('public');
+  const [visibility, setVisibility] = React.useState('Public'); // Chuyển thành 'Public' (chữ hoa)
   const [invitedSuppliers, setInvitedSuppliers] = React.useState<string[]>([]);
   const [email, setEmail] = React.useState('');
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
@@ -44,17 +46,17 @@ export default function TenderForm() {
     setInvitedSuppliers(invitedSuppliers.filter((supplier) => supplier !== emailToRemove));
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (email && !isValidEmail(email)) {
       setAlertMessage('Email không hợp lệ!');
       setAlertSeverity('error');
       setOpenSnackbar(true);
-      return; // Dừng lại nếu email không hợp lệ
+      return;
     }
 
-    if (email || invitedSuppliers) {
+    if (email) {
       handleAddEmail();
     }
 
@@ -65,18 +67,34 @@ export default function TenderForm() {
       invited_suppliers: invitedSuppliers,
     };
 
-    const isSuccess = true;
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        setAlertMessage('Bạn cần đăng nhập để thực hiện thao tác này.');
+        setAlertSeverity('error');
+        setOpenSnackbar(true);
+        return;
+      }
 
-    if (isSuccess) {
+      // Gọi API tạo tender
+      await axios.post('http://localhost/api/tender', tenderData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       setAlertMessage('Create tender success');
       setAlertSeverity('success');
       setOpenSnackbar(true);
-      console.log(tenderData);
-    } else {
+
+      // Chuyển hướng đến trang khác sau khi tạo tender thành công
+      navigate('/tenders');
+
+    } catch (error) {
       setAlertMessage('Create tender failed');
       setAlertSeverity('error');
       setOpenSnackbar(true);
-      console.log(tenderData);
+      console.error(error);
     }
   };
 
@@ -142,7 +160,7 @@ export default function TenderForm() {
             <InputLabel>Visibility</InputLabel>
             <Select
               value={visibility}
-              onChange={(e) => setVisibility(e.target.value)}
+              onChange={(e) => setVisibility(e.target.value as 'Public' | 'Private')}
               label="Visibility"
               sx={{
                 backgroundColor: '#fff',
@@ -154,8 +172,8 @@ export default function TenderForm() {
                 },
               }}
             >
-              <MenuItem value="public">Public</MenuItem>
-              <MenuItem value="private">Private</MenuItem>
+              <MenuItem value="Public">Public</MenuItem> {/* Chuyển thành 'Public' */}
+              <MenuItem value="Private">Private</MenuItem> {/* Chuyển thành 'Private' */}
             </Select>
           </FormControl>
           <TextField
@@ -193,7 +211,6 @@ export default function TenderForm() {
               '&:hover': {
                 backgroundColor: '#2d4377',
               },
-
             }}
             onClick={handleAddEmail}
           >
