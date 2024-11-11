@@ -34,58 +34,66 @@ const Suppliers = () => {
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3, color: '#333' }}>
         Suppliers
       </Typography>
+      <Box sx={{
+        backgroundColor: "#fff",
+        padding: '20px',
+        borderRadius: "10px",
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',  // Bóng mờ màu xám nhạt
+        marginBottom: "10px"
+      }}
+      >
+        <Box sx={{ display: 'flex', gap: '16px', mb: 4, alignItems: 'center' }}>
+          <FormControl fullWidth variant="outlined" sx={{ maxWidth: 200 }}>
+            <InputLabel>Filter by Invited</InputLabel>
+            <Select
+              value={invitedFilter}
+              onChange={handleInvitedFilterChange}
+              label="Filter by Invited"
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="public">Public</MenuItem>
+              <MenuItem value="private">Private</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
 
-      <Box sx={{ display: 'flex', gap: '16px', mb: 4, alignItems: 'center' }}>
-        <FormControl fullWidth variant="outlined" sx={{ minWidth: 200 }}>
-          <InputLabel>Filter by Invited</InputLabel>
-          <Select
-            value={invitedFilter}
-            onChange={handleInvitedFilterChange}
-            label="Filter by Invited"
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="public">Public</MenuItem>
-            <MenuItem value="private">Private</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
-      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: '#3a539b' }}>
-              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
-                <TableSortLabel style={{ color: '#ffffff' }}>Title</TableSortLabel>
-              </TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Description</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Visibility</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Invited Suppliers</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Invited</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Created At</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredData.map((item, index) => (
-              <TableRow
-                key={index}
-                sx={{
-                  '&:nth-of-type(odd)': { backgroundColor: '#eaeaea' },
-                  '&:nth-of-type(even)': { backgroundColor: '#ffffff' },
-                  '&:hover': { backgroundColor: '#d5d5d5' },
-                  height: 56,
-                }}
-              >
-                <TableCell>{item.title}</TableCell>
-                <TableCell>{item.description}</TableCell>
-                <TableCell>{item.visibility}</TableCell>
-                <TableCell>{item.invited_suppliers.join(', ')}</TableCell>
-                <TableCell>{item.invited}</TableCell>
-                <TableCell>{item.created_at}</TableCell>
+        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: '#3a539b' }}>
+                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
+                  <TableSortLabel style={{ color: '#ffffff' }}>Title</TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Description</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Visibility</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Invited Suppliers</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Invited</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Created At</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {filteredData.map((item, index) => (
+                <TableRow
+                  key={index}
+                  sx={{
+                    '&:nth-of-type(odd)': { backgroundColor: '#eaeaea' },
+                    '&:nth-of-type(even)': { backgroundColor: '#ffffff' },
+                    '&:hover': { backgroundColor: '#d5d5d5' },
+                    height: 56,
+                  }}
+                >
+                  <TableCell>{item.title}</TableCell>
+                  <TableCell>{item.description}</TableCell>
+                  <TableCell>{item.visibility}</TableCell>
+                  <TableCell>{item.invited_suppliers.join(', ')}</TableCell>
+                  <TableCell>{item.invited}</TableCell>
+                  <TableCell>{item.created_at}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
     </Container>
   );
 };
