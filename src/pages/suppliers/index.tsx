@@ -1,33 +1,71 @@
-import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField, MenuItem, Select, InputLabel, FormControl, Container, SelectChangeEvent, Paper, Typography, Box } from '@mui/material';
-
-const data = [
-  { title: "Tender 1", description: "Description for tender 1", visibility: "public", invited_suppliers: ["supplier1@example.com", "supplier2@example.com"], created_at: "2024-11-01", invited: "public" },
-  { title: "Tender 2", description: "Description for tender 2", visibility: "private", invited_suppliers: ["supplier3@example.com"], created_at: "2024-11-02", invited: "private" },
-  { title: "Tender 3", description: "Description for tender 3", visibility: "public", invited_suppliers: ["supplier4@example.com", "supplier5@example.com"], created_at: "2024-11-03", invited: "public" },
-  { title: "Tender 4", description: "Description for tender 4", visibility: "private", invited_suppliers: ["supplier6@example.com"], created_at: "2024-11-04", invited: "private" },
-  { title: "Tender 5", description: "Description for tender 5", visibility: "public", invited_suppliers: ["supplier7@example.com"], created_at: "2024-11-05", invited: "public" },
-  { title: "Tender 6", description: "Description for tender 6", visibility: "private", invited_suppliers: ["supplier8@example.com"], created_at: "2024-11-06", invited: "private" },
-  { title: "Tender 7", description: "Description for tender 7", visibility: "public", invited_suppliers: ["supplier9@example.com"], created_at: "2024-11-07", invited: "public" },
-  { title: "Tender 8", description: "Description for tender 8", visibility: "private", invited_suppliers: ["supplier10@example.com"], created_at: "2024-11-08", invited: "private" },
-  { title: "Tender 9", description: "Description for tender 9", visibility: "public", invited_suppliers: ["supplier11@example.com"], created_at: "2024-11-09", invited: "public" },
-  { title: "Tender 10", description: "Description for tender 10", visibility: "private", invited_suppliers: ["supplier12@example.com"], created_at: "2024-11-10", invited: "private" },
-];
+import React, { useState, useEffect } from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, MenuItem, Select, InputLabel, FormControl, Container, SelectChangeEvent, Paper, Typography, Box, CircularProgress } from '@mui/material';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const Suppliers = () => {
-  const [filteredData, setFilteredData] = useState(data);
-  const [invitedFilter, setInvitedFilter] = useState('');
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+  const [visibilityFilter, setVisibilityFilter] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const handleInvitedFilterChange = (event: SelectChangeEvent<string>) => {
-    const value = event.target.value;
-    setInvitedFilter(value);
+  const fetchData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        setError('You need to log in to access this data.');
+        setLoading(false);
+        return;
+      }
 
-    if (value === '') {
-      setFilteredData(data);
-    } else {
-      setFilteredData(data.filter(item => item.invited === value));
+      const response = await axios.get('http://localhost/api/tender/sup', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setFilteredData(response.data.tenders);
+    } catch (error) {
+      setError('Failed to fetch data from API.');
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData(); // Gọi API khi component được tải lần đầu
+  }, []);
+
+  const handleVisibilityFilterChange = (event: SelectChangeEvent<string>) => {
+    const value = event.target.value;
+    setVisibilityFilter(value);
+
+    if (value === '') {
+      // Nếu chọn "All", gọi lại API để lấy tất cả dữ liệu
+      fetchData();
+    } else {
+      // Lọc dữ liệu hiện tại theo `visibility`
+      setFilteredData((prevData) => prevData.filter(item => item.visibility.toLowerCase() === value));
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Typography color="error" align="center">
+        {error}
+      </Typography>
+    );
+  }
 
   return (
     <Container sx={{ mt: 4 }}>
@@ -38,17 +76,17 @@ const Suppliers = () => {
         backgroundColor: "#fff",
         padding: '20px',
         borderRadius: "10px",
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',  // Bóng mờ màu xám nhạt
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
         marginBottom: "10px"
       }}
       >
         <Box sx={{ display: 'flex', gap: '16px', mb: 4, alignItems: 'center' }}>
           <FormControl fullWidth variant="outlined" sx={{ maxWidth: 200 }}>
-            <InputLabel>Filter by Invited</InputLabel>
+            <InputLabel>Filter by Visibility</InputLabel>
             <Select
-              value={invitedFilter}
-              onChange={handleInvitedFilterChange}
-              label="Filter by Invited"
+              value={visibilityFilter}
+              onChange={handleVisibilityFilterChange}
+              label="Filter by Visibility"
             >
               <MenuItem value="">All</MenuItem>
               <MenuItem value="public">Public</MenuItem>
@@ -66,8 +104,6 @@ const Suppliers = () => {
                 </TableCell>
                 <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Description</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Visibility</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Invited Suppliers</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Invited</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Created At</TableCell>
               </TableRow>
             </TableHead>
@@ -85,9 +121,7 @@ const Suppliers = () => {
                   <TableCell>{item.title}</TableCell>
                   <TableCell>{item.description}</TableCell>
                   <TableCell>{item.visibility}</TableCell>
-                  <TableCell>{item.invited_suppliers.join(', ')}</TableCell>
-                  <TableCell>{item.invited}</TableCell>
-                  <TableCell>{item.created_at}</TableCell>
+                  <TableCell>{item.created_at.substring(0, 10)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
