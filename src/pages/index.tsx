@@ -88,7 +88,7 @@ export default function TenderForm() {
       setOpenSnackbar(true);
 
       // Chuyển hướng đến trang khác sau khi tạo tender thành công
-      navigate('/tenders');
+      navigate('/contractors');
 
     } catch (error) {
       setAlertMessage('Create tender failed');

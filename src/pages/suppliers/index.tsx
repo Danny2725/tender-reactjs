@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, MenuItem, Select, InputLabel, FormControl, Container, SelectChangeEvent, Paper, Typography, Box, CircularProgress } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, MenuItem, Select, InputLabel, FormControl, Container, Paper, Typography, Box, CircularProgress } from '@mui/material';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const Suppliers = () => {
+  const [data, setData] = useState<any[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [visibilityFilter, setVisibilityFilter] = useState('');
   const [loading, setLoading] = useState(true);
@@ -25,7 +26,7 @@ const Suppliers = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
+      setData(response.data.tenders);
       setFilteredData(response.data.tenders);
     } catch (error) {
       setError('Failed to fetch data from API.');
@@ -35,19 +36,19 @@ const Suppliers = () => {
   };
 
   useEffect(() => {
-    fetchData(); // Gọi API khi component được tải lần đầu
+    fetchData();
   }, []);
 
-  const handleVisibilityFilterChange = (event: SelectChangeEvent<string>) => {
+  const handleVisibilityFilterChange = (event: { target: { value: any; }; }) => {
     const value = event.target.value;
     setVisibilityFilter(value);
 
     if (value === '') {
-      // Nếu chọn "All", gọi lại API để lấy tất cả dữ liệu
-      fetchData();
+      // Nếu chọn "All", reset về dữ liệu gốc
+      setFilteredData(data);
     } else {
       // Lọc dữ liệu hiện tại theo `visibility`
-      setFilteredData((prevData) => prevData.filter(item => item.visibility.toLowerCase() === value));
+      setFilteredData(data.filter(item => item.visibility.toLowerCase() === value));
     }
   };
 
