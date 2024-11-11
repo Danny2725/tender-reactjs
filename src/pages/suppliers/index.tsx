@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField, MenuItem, Select, InputLabel, FormControl, Container, SelectChangeEvent } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField, MenuItem, Select, InputLabel, FormControl, Container, SelectChangeEvent, Paper, Typography, Box } from '@mui/material';
 
-// Dữ liệu mẫu
 const data = [
   { title: "Tender 1", description: "Description for tender 1", visibility: "public", invited_suppliers: ["supplier1@example.com", "supplier2@example.com"], created_at: "2024-11-01", invited: "public" },
   { title: "Tender 2", description: "Description for tender 2", visibility: "private", invited_suppliers: ["supplier3@example.com"], created_at: "2024-11-02", invited: "private" },
@@ -31,40 +30,55 @@ const Suppliers = () => {
   };
 
   return (
-    <Container>
-      <h1>Suppliers</h1>
-      <FormControl fullWidth>
-        <InputLabel>Filter by Invited</InputLabel>
-        <Select
-          value={invitedFilter}
-          onChange={handleInvitedFilterChange}
-          label="Filter by Invited"
-        >
-          <MenuItem value="">All</MenuItem>
-          <MenuItem value="public">Public</MenuItem>
-          <MenuItem value="private">Private</MenuItem>
-        </Select>
-      </FormControl>
+    <Container sx={{ mt: 4 }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3, color: '#333' }}>
+        Suppliers
+      </Typography>
 
-      <TableContainer>
+      <Box sx={{ display: 'flex', gap: '16px', mb: 4, alignItems: 'center' }}>
+        <FormControl fullWidth variant="outlined" sx={{ minWidth: 200 }}>
+          <InputLabel>Filter by Invited</InputLabel>
+          <Select
+            value={invitedFilter}
+            onChange={handleInvitedFilterChange}
+            label="Filter by Invited"
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="public">Public</MenuItem>
+            <MenuItem value="private">Private</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
+      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
         <Table>
           <TableHead>
-            <TableRow>
-              <TableCell>Title</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Visibility</TableCell>
-              <TableCell>invited Suppliers</TableCell>
-              <TableCell>Invited</TableCell>
-              <TableCell>Created At</TableCell>
+            <TableRow sx={{ backgroundColor: '#3a539b' }}>
+              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
+                <TableSortLabel style={{ color: '#ffffff' }}>Title</TableSortLabel>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Description</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Visibility</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Invited Suppliers</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Invited</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Created At</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredData.map((item, index) => (
-              <TableRow key={index}>
+              <TableRow
+                key={index}
+                sx={{
+                  '&:nth-of-type(odd)': { backgroundColor: '#eaeaea' },
+                  '&:nth-of-type(even)': { backgroundColor: '#ffffff' },
+                  '&:hover': { backgroundColor: '#d5d5d5' },
+                  height: 56,
+                }}
+              >
                 <TableCell>{item.title}</TableCell>
                 <TableCell>{item.description}</TableCell>
                 <TableCell>{item.visibility}</TableCell>
-                <TableCell>{item.invited_suppliers}</TableCell>
+                <TableCell>{item.invited_suppliers.join(', ')}</TableCell>
                 <TableCell>{item.invited}</TableCell>
                 <TableCell>{item.created_at}</TableCell>
               </TableRow>

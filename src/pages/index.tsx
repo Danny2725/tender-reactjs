@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Box, Button, TextField, Typography, Container, FormControl, InputLabel, Select, MenuItem, Snackbar, Alert } from '@mui/material';
-import { useNavigate } from 'react-router-dom'; // Thay useRouter bằng useNavigate từ react-router-dom
+import { useNavigate } from 'react-router-dom';
 
 export default function TenderForm() {
-  const navigate = useNavigate(); // Khởi tạo useNavigate
+  const navigate = useNavigate();
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [visibility, setVisibility] = React.useState('public');
@@ -26,7 +26,7 @@ export default function TenderForm() {
       setOpenSnackbar(true);
       return;
     }
-    
+
     if (!isValidEmail(email)) {
       setAlertMessage('Email không hợp lệ!');
       setAlertSeverity('error');
@@ -46,42 +46,37 @@ export default function TenderForm() {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-  
-    // Kiểm tra nếu email hợp lệ
+
     if (email && !isValidEmail(email)) {
       setAlertMessage('Email không hợp lệ!');
       setAlertSeverity('error');
       setOpenSnackbar(true);
       return; // Dừng lại nếu email không hợp lệ
     }
-  
-    // Nếu email hợp lệ, tiếp tục thêm email vào danh sách
+
     if (email || invitedSuppliers) {
       handleAddEmail();
     }
-  
+
     const tenderData = {
       title,
       description,
       visibility,
       invited_suppliers: invitedSuppliers,
     };
-  
-    // Giả sử bạn gửi dữ liệu đấu thầu thành công
-    const isSuccess = true; // Giả sử bạn có một điều kiện để kiểm tra thành công hay thất bại.
-  
+
+    const isSuccess = true;
+
     if (isSuccess) {
-      setAlertMessage('Tạo đấu thầu thành công!');
+      setAlertMessage('Create tender success');
       setAlertSeverity('success');
       setOpenSnackbar(true);
-      console.log(tenderData); // In dữ liệu đấu thầu thành công
-
-      // Điều hướng đến trang khác sau khi tạo thành công
+      console.log(tenderData);
     } else {
-      setAlertMessage('Tạo đấu thầu thất bại!');
+      setAlertMessage('Create tender failed');
       setAlertSeverity('error');
       setOpenSnackbar(true);
-      console.log(tenderData); // In dữ liệu đấu thầu thất bại
+      console.log(tenderData);
     }
   };
 
@@ -93,43 +88,80 @@ export default function TenderForm() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          padding: 4,
+          backgroundColor: '#f5f5f5',
+          borderRadius: 4,
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
         }}
       >
-        <Typography component="h1" variant="h5">
-          Tạo đấu thầu
+        <Typography component="h1" variant="h5" sx={{ fontWeight: 600, mb: 3, color: '#333' }}>
+          Create Tender
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
           <TextField
             margin="normal"
             required
             fullWidth
-            label="Tiêu đề đấu thầu"
+            label="Your tender"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            sx={{
+              mb: 2,
+              backgroundColor: '#fff',
+              borderRadius: 1,
+              '& .MuiInputBase-root': {
+                border: '1px solid #ddd',
+                boxShadow: 'none',
+              },
+              '& .MuiInputBase-root:focus': {
+                borderColor: '#007bff',
+              },
+            }}
           />
           <TextField
             margin="normal"
             required
             fullWidth
-            label="Mô tả chi tiết"
+            label="Detailed description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            sx={{
+              mb: 2,
+              backgroundColor: '#fff',
+              borderRadius: 1,
+              '& .MuiInputBase-root': {
+                border: '1px solid #ddd',
+                boxShadow: 'none',
+              },
+              '& .MuiInputBase-root:focus': {
+                borderColor: '#007bff',
+              },
+            }}
           />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Khả năng hiển thị</InputLabel>
+          <FormControl fullWidth margin="normal" sx={{ mb: 2 }}>
+            <InputLabel>Visibility</InputLabel>
             <Select
               value={visibility}
               onChange={(e) => setVisibility(e.target.value)}
-              label="Khả năng hiển thị"
+              label="Visibility"
+              sx={{
+                backgroundColor: '#fff',
+                '& .MuiInputBase-root': {
+                  border: '1px solid #ddd',
+                },
+                '& .MuiInputBase-root:focus': {
+                  borderColor: '#007bff',
+                },
+              }}
             >
-              <MenuItem value="public">Công khai</MenuItem>
-              <MenuItem value="private">Riêng tư</MenuItem>
+              <MenuItem value="public">Public</MenuItem>
+              <MenuItem value="private">Private</MenuItem>
             </Select>
           </FormControl>
           <TextField
             margin="normal"
             fullWidth
-            label="Email nhà cung cấp"
+            label="Supplier email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onKeyPress={(e) => {
@@ -137,15 +169,35 @@ export default function TenderForm() {
                 handleAddEmail();
               }
             }}
+            sx={{
+              mb: 2,
+              backgroundColor: '#fff',
+              borderRadius: 1,
+              '& .MuiInputBase-root': {
+                border: '1px solid #ddd',
+                boxShadow: 'none',
+              },
+              '& .MuiInputBase-root:focus': {
+                borderColor: '#007bff',
+              },
+            }}
           />
           <Button
             type="button"
             fullWidth
             variant="contained"
-            sx={{ mt: 2, mb: 2 }}
+            sx={{
+              mt: 1,
+              mb: 2,
+              backgroundColor: '#3a539b',
+              '&:hover': {
+                backgroundColor: '#2d4377',
+              },
+
+            }}
             onClick={handleAddEmail}
           >
-            Thêm Email
+            Add Your Mail
           </Button>
           <Box sx={{ mb: 2 }}>
             {invitedSuppliers.map((email, index) => (
@@ -156,9 +208,15 @@ export default function TenderForm() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   mb: 1,
+                  padding: 1,
+                  backgroundColor: '#ffffff',
+                  borderRadius: 2,
+                  border: '1px solid #ddd',
                 }}
               >
-                <Typography variant="body2">{email}</Typography>
+                <Typography variant="body2" sx={{ color: '#333' }}>
+                  {email}
+                </Typography>
                 <Button
                   variant="outlined"
                   color="error"
@@ -174,9 +232,16 @@ export default function TenderForm() {
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3, mb: 2 }}
+            sx={{
+              mt: 2,
+              mb: 2,
+              backgroundColor: '#28a745',
+              '&:hover': {
+                backgroundColor: '#218838',
+              },
+            }}
           >
-            Tạo đấu thầu
+            Create Tender
           </Button>
         </Box>
       </Box>
