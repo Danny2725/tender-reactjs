@@ -118,8 +118,15 @@ const ContractorsPage = () => {
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2, color: '#333' }}>
         Contractors
       </Typography>
-
-      <Box sx={{ display: 'flex', gap: '16px', mb: 2, alignItems: 'center' }}>
+      <Box sx={{
+        backgroundColor: "#fff",
+        padding: '20px', 
+        borderRadius: "10px",
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',  // Bóng mờ màu xám nhạt
+        marginBottom: "10px"
+      }}
+        >      
+        <Box sx={{ display: 'flex', gap: '16px', mb: 2, alignItems: 'center' }}>
         <FormControl variant="outlined" sx={{ minWidth: 150, fontSize: '14px' }} className='!p-[10px]'>
           <InputLabel sx={{ fontSize: '14px' }}>Visibility</InputLabel>
           <Select value={visibilityFilter} onChange={handleVisibilityChange} label="Visibility" sx={{ fontSize: '14px' }}>
@@ -160,49 +167,50 @@ const ContractorsPage = () => {
         </Button>
       </Box>
 
-      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: '#3a539b' }}>
-              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
-                <TableSortLabel style={{ color: '#ffffff' }}>Title</TableSortLabel>
-              </TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Description</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Visibility</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Invited Suppliers</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Created At</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Actions</TableCell> {/* Cột mới */}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredData.map((item, index) => (
-              <TableRow
-                key={index}
-                sx={{
-                  '&:nth-of-type(odd)': { backgroundColor: '#eaeaea' },
-                  '&:nth-of-type(even)': { backgroundColor: '#ffffff' },
-                  '&:hover': { backgroundColor: '#d5d5d5' },
-                  height: 56,
-                }}
-              >
-                <TableCell>{item.title}</TableCell>
-                <TableCell>{item.description}</TableCell>
-                <TableCell>{item.visibility}</TableCell>
-                <TableCell>{item.invited_suppliers.join(', ')}</TableCell>
-                <TableCell>{item.create_at}</TableCell>
-                <TableCell>
-                  <Button onClick={() => handleEdit()} sx={{ mr: 1 }}>
-                    <EditIcon />
-                  </Button>
-                  <Button onClick={() => handleDelete()} color="error">
-                    <DeleteIcon />
-                  </Button>
-                </TableCell> {/* Cột Action */}
+        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: '#3a539b' }}>
+                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>
+                  <TableSortLabel style={{ color: '#ffffff' }}>Title</TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Description</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Visibility</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Invited Suppliers</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Created At</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Actions</TableCell> {/* Cột mới */}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {filteredData.map((item, index) => (
+                <TableRow
+                  key={index}
+                  sx={{
+                    '&:nth-of-type(odd)': { backgroundColor: '#eaeaea' },
+                    '&:nth-of-type(even)': { backgroundColor: '#ffffff' },
+                    '&:hover': { backgroundColor: '#d5d5d5' },
+                    height: 56,
+                  }}
+                >
+                  <TableCell>{item.title}</TableCell>
+                  <TableCell>{item.description}</TableCell>
+                  <TableCell>{item.visibility}</TableCell>
+                  <TableCell>{item.invited_suppliers.join(', ')}</TableCell>
+                  <TableCell>{item.create_at}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleEdit()} sx={{ mr: 1 }}>
+                      <EditIcon />
+                    </Button>
+                    <Button onClick={() => handleDelete()} color="error">
+                      <DeleteIcon />
+                    </Button>
+                  </TableCell> {/* Cột Action */}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
 
       {/* Hộp thoại xác nhận xóa */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
