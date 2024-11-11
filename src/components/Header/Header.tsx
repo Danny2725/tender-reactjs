@@ -12,7 +12,7 @@ import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
-import { useUser } from '../../context/UserContext';
+
 
 const pages = ['Create Tender', 'Contractors', 'Suppliers'];
 const routes = ['/', '/contractors', '/suppliers']; // Định nghĩa các route tương ứng
@@ -20,7 +20,7 @@ const routes = ['/', '/contractors', '/suppliers']; // Định nghĩa các route
 function ResponsiveAppBar() {
     const navigate = useNavigate(); // Khởi tạo navigate để điều hướng
     const location = useLocation(); // Khởi tạo useLocation để lấy đường dẫn hiện tại
-    const { user } = useUser();
+
 
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
@@ -143,13 +143,7 @@ function ResponsiveAppBar() {
 
                     {/* User Menu */}
                     <Box sx={{ flexGrow: 0 }}>
-                        {!user ? (
-                            <Tooltip title="Open settings">
-                                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                    <Avatar alt="User Avatar" src="/static/images/avatar/2.jpg" />
-                                </IconButton>
-                            </Tooltip>
-                        ) : null}
+    
                         <Menu
                             sx={{ mt: '45px' }}
                             id="menu-appbar"

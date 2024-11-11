@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { UserProvider } from './context/UserContext';
+
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/index';
 import Contractors from './pages/contractors/index';
@@ -12,7 +12,7 @@ import Header from './components/Header/Header';
 const App = () => {
   return (
     <Router>
-      <UserProvider>
+
         <Header />
         <div>
           <Routes>
@@ -49,7 +49,6 @@ const App = () => {
             />
           </Routes>
         </div>
-      </UserProvider>
     </Router>
   );
 };
