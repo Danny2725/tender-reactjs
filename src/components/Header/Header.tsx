@@ -12,6 +12,7 @@ import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import Cookies from 'js-cookie';
 
 
 const pages = ['Create Tender', 'Contractors', 'Suppliers'];
@@ -41,6 +42,7 @@ function ResponsiveAppBar() {
     };
 
     const handleLogout = () => {
+        Cookies.remove('token'); // Xóa token khỏi cookie
         handleCloseUserMenu(); // Đóng menu user
         navigate('/login'); // Điều hướng sang trang login
     };
@@ -51,7 +53,13 @@ function ResponsiveAppBar() {
     };
 
     const isActive = (route: string) => location.pathname === route; // Kiểm tra xem route hiện tại có phải là route đang chọn không
+    const token = Cookies.get('token');
 
+    React.useEffect(() => {
+        if (!token) {
+            navigate('/login');
+        }
+    }, [token, navigate]);
     return (
         <AppBar position="static" sx={{ backgroundColor: '#fff', boxShadow: 'none' }}>
             <Container maxWidth="xl">
@@ -143,7 +151,13 @@ function ResponsiveAppBar() {
 
                     {/* User Menu */}
                     <Box sx={{ flexGrow: 0 }}>
-    
+                        {token ? (
+                            <Tooltip title="Open settings">
+                                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                                    <Avatar alt="User Avatar" src="/static/images/avatar/2.jpg" />
+                                </IconButton>
+                            </Tooltip>
+                        ) : null}
                         <Menu
                             sx={{ mt: '45px' }}
                             id="menu-appbar"
