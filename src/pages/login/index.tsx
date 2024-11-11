@@ -1,12 +1,23 @@
 import * as React from 'react';
 import { Box, Button, TextField, Typography, Container, Grid, Paper, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../context/UserContext';
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const { login, user } = useUser();
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string>('');
+
   const [role, setRole] = React.useState<'contractor' | 'supplier'>('contractor');
+
+  React.useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleRoleChange = (event: React.MouseEvent<HTMLElement>, newRole: 'contractor' | 'supplier' | null) => {
     if (newRole) {
@@ -14,15 +25,35 @@ export default function Login() {
     }
   };
 
-  const handleLogin = () => {
-    console.log("Login with email:", email, "and password:", password);
-    navigate('/');
-  };
+  // const handleLogin = () => {
+  //   console.log("Login with email:", email, "and password:", password);
+  //   navigate('/');
+  // };
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
+    // Validation
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      await login(email, password);
+      // UserContext sẽ tự động redirect sang trang chủ sau khi đăng nhập thành công
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <Container component="main" maxWidth="md" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', paddingBottom: '5vh' }}>
       <Paper elevation={4} sx={{ p: 4, display: 'flex', flexDirection: 'row', alignItems: 'center', borderRadius: 3, maxWidth: 800 }}>
-        
         {/* Illustration or Image */}
         <Grid item xs={12} md={6} sx={{ display: { xs: 'none', md: 'block' }, textAlign: 'center' }}>
           <Box
@@ -35,8 +66,8 @@ export default function Login() {
 
         {/* Login Form */}
         <Grid item xs={12} md={6} sx={{ p: 3 }}>
-          <Typography component="h1" variant="h4" align="center" fontWeight="bold" color="primary" sx={{ mb: 2 }}>
-            Login to DeskApp
+          <Typography component="h1" variant="h4" align="center" fontWeight="bold" color="primary" sx={{ mb: 2, fontSize: '20px' }}>
+            Login
           </Typography>
 
           {/* Role Selection */}
@@ -46,12 +77,12 @@ export default function Login() {
             exclusive
             onChange={handleRoleChange}
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{ mb: 0.5 }}
           >
-            <ToggleButton value="contractor" sx={{ fontWeight: role === 'contractor' ? 'bold' : 'normal' }}>
+            <ToggleButton value="contractor" sx={{ fontWeight: role === 'contractor' ? 'bold' : 'normal', fontSize: '12px' }}>
               I'm Contractor
             </ToggleButton>
-            <ToggleButton value="supplier" sx={{ fontWeight: role === 'supplier' ? 'bold' : 'normal' }}>
+            <ToggleButton value="supplier" sx={{ fontWeight: role === 'supplier' ? 'bold' : 'normal', fontSize: '12px' }}>
               I'm Supplier
             </ToggleButton>
           </ToggleButtonGroup>
@@ -85,22 +116,14 @@ export default function Login() {
               fullWidth
               variant="contained"
               color="primary"
-              sx={{ mt: 3, mb: 2, fontWeight: 'bold', p: 1.5 }}
+              sx={{ mt: 1.5, mb: 2, fontWeight: 'bold', p: 1, borderRadius: '30px' }}
               onClick={handleLogin}
             >
               Sign In
             </Button>
-            <Typography align="center" variant="body2" sx={{ mt: 2 }}>
-              OR
-            </Typography>
-            <Button
-              variant="outlined"
-              fullWidth
-              sx={{ mt: 2, fontWeight: 'bold', p: 1.5 }}
-              onClick={() => navigate('/register')}
-            >
+            <Typography onClick={() => navigate('/register')} align="center" variant="body2" color="primary" sx={{fontWeight: 600, cursor: 'pointer'}}>
               Register To Create Account
-            </Button>
+            </Typography>
           </Box>
         </Grid>
       </Paper>

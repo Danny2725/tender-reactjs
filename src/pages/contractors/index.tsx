@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField, MenuItem, Select, InputLabel, FormControl, Button, SelectChangeEvent, Paper, Typography, Box } from '@mui/material';
-
+import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField, MenuItem, Select, InputLabel, FormControl, Button, SelectChangeEvent, Paper, Typography, Box, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 const sampleData = [
   {
     title: "Tender 1",
@@ -78,6 +79,8 @@ const ContractorsPage = () => {
   const [data, setData] = useState(sampleData);
   const [visibilityFilter, setVisibilityFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>("");
+  const [openDialog, setOpenDialog] = useState(false);  // Mở hoặc đóng hộp thoại
+  const [editDialogOpen, setEditDialogOpen] = useState(false);  // Hộp thoại chỉnh sửa
 
   const handleVisibilityChange = (event: SelectChangeEvent<string>) => {
     setVisibilityFilter(event.target.value);
@@ -87,6 +90,23 @@ const ContractorsPage = () => {
     setDateFilter(event.target.value as string);
   };
 
+  const handleDelete = () => {
+    setOpenDialog(true);  // Mở hộp thoại xác nhận
+  };
+
+  const confirmDelete = () => {
+    setOpenDialog(false);  // Mở hộp thoại xác nhận
+    console.log("Successfull")
+  };
+
+  const handleEdit = () => {
+    setEditDialogOpen(true);  // Mở hộp thoại chỉnh sửa
+    console.log('Editing item:');
+  };
+  const handleSaveEdit = () => {
+    setEditDialogOpen(false);
+
+  };
   const filteredData = data.filter((item) => {
     const matchesVisibility = visibilityFilter === "all" || item.visibility === visibilityFilter;
     const matchesDate = dateFilter ? item.create_at === dateFilter : true;
@@ -95,17 +115,17 @@ const ContractorsPage = () => {
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3, color: '#333' }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2, color: '#333' }}>
         Contractors
       </Typography>
 
-      <Box sx={{ display: 'flex', gap: '16px', mb: 4, alignItems: 'center' }}>
-        <FormControl variant="outlined" sx={{ minWidth: 150 }}>
-          <InputLabel>Visibility</InputLabel>
-          <Select value={visibilityFilter} onChange={handleVisibilityChange} label="Visibility">
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="public">Public</MenuItem>
-            <MenuItem value="private">Private</MenuItem>
+      <Box sx={{ display: 'flex', gap: '16px', mb: 2, alignItems: 'center' }}>
+        <FormControl variant="outlined" sx={{ minWidth: 150, fontSize: '14px' }} className='!p-[10px]'>
+          <InputLabel sx={{ fontSize: '14px' }}>Visibility</InputLabel>
+          <Select value={visibilityFilter} onChange={handleVisibilityChange} label="Visibility" sx={{ fontSize: '14px' }}>
+            <MenuItem value="all" sx={{ fontSize: '14px' }}>All</MenuItem>
+            <MenuItem value="public" sx={{ fontSize: '14px' }}>Public</MenuItem>
+            <MenuItem value="private" sx={{ fontSize: '14px' }}>Private</MenuItem>
           </Select>
         </FormControl>
 
@@ -115,7 +135,8 @@ const ContractorsPage = () => {
           onChange={handleDateChange}
           variant="outlined"
           type="date"
-          InputLabelProps={{ shrink: true }}
+          InputLabelProps={{ shrink: true, style: { fontSize: '14px' } }}
+          sx={{ fontSize: '14px', padding: '10px 10px' }}
         />
 
         <Button
@@ -126,14 +147,16 @@ const ContractorsPage = () => {
           }}
           sx={{
             backgroundColor: '#3a539b',
+            height: '56px',
             color: '#ffffff',
             fontWeight: 600,
+            borderRadius: '5px',
             '&:hover': {
               backgroundColor: '#2f4477',
             },
           }}
         >
-          Reset Filters
+          Search
         </Button>
       </Box>
 
@@ -148,6 +171,7 @@ const ContractorsPage = () => {
               <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Visibility</TableCell>
               <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Invited Suppliers</TableCell>
               <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Created At</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: '#ffffff' }}>Actions</TableCell> {/* Cột mới */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -166,11 +190,85 @@ const ContractorsPage = () => {
                 <TableCell>{item.visibility}</TableCell>
                 <TableCell>{item.invited_suppliers.join(', ')}</TableCell>
                 <TableCell>{item.create_at}</TableCell>
+                <TableCell>
+                  <Button onClick={() => handleEdit()} sx={{ mr: 1 }}>
+                    <EditIcon />
+                  </Button>
+                  <Button onClick={() => handleDelete()} color="error">
+                    <DeleteIcon />
+                  </Button>
+                </TableCell> {/* Cột Action */}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Hộp thoại xác nhận xóa */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete this tender?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={confirmDelete} color="error">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
+      {/* Hộp thoại chỉnh sửa */}
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+        <DialogTitle>Edit Tender</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Title"
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            label="Description"
+            fullWidth
+            sx={{ mb: 2 }}
+
+          />
+          <TextField
+            label="Visibility	"
+            fullWidth
+            sx={{ mb: 2 }}
+
+          />
+          <TextField
+            label="Invited Suppliers	"
+            fullWidth
+            sx={{ mb: 2 }}
+
+          />
+          <TextField
+            label="Date"
+            type="date"
+            fullWidth
+            sx={{ mb: 2 }}
+
+            InputLabelProps={{
+              shrink: true,  // Làm cho label luôn hiển thị khi có giá trị
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditDialogOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSaveEdit} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Container>
   );
 };

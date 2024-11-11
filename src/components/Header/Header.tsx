@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate từ react-router-dom
+import { useNavigate, useLocation } from 'react-router-dom'; // Import useLocation từ react-router-dom
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -12,12 +12,16 @@ import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import { useUser } from '../../context/UserContext';
 
 const pages = ['Create Tender', 'Contractors', 'Suppliers'];
 const routes = ['/', '/contractors', '/suppliers']; // Định nghĩa các route tương ứng
 
 function ResponsiveAppBar() {
     const navigate = useNavigate(); // Khởi tạo navigate để điều hướng
+    const location = useLocation(); // Khởi tạo useLocation để lấy đường dẫn hiện tại
+    const { user } = useUser();
+
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
@@ -46,23 +50,25 @@ function ResponsiveAppBar() {
         handleCloseNavMenu(); // Đóng menu khi đã chọn trang
     };
 
+    const isActive = (route: string) => location.pathname === route; // Kiểm tra xem route hiện tại có phải là route đang chọn không
+
     return (
-        <AppBar position="static" sx={{ backgroundColor: '#333', boxShadow: 'none' }}>
+        <AppBar position="static" sx={{ backgroundColor: '#fff', boxShadow: 'none' }}>
             <Container maxWidth="xl">
-                <Toolbar disableGutters>
-                    <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, color: '#fff' }} />
+                <Toolbar disableGutters sx={{ gap: '10px' }}>
+                    <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, color: '#000' }} />
                     <Typography
                         variant="h6"
                         noWrap
                         component="a"
-                        onClick={() => navigate('/')} // Điều hướng về trang chủ
+                        onClick={() => navigate('/')}
                         sx={{
                             mr: 2,
                             display: { xs: 'none', md: 'flex' },
                             fontFamily: 'Roboto, sans-serif',
                             fontWeight: 700,
                             letterSpacing: '.3rem',
-                            color: '#fff',
+                            color: '#000',
                             textDecoration: 'none',
                             '&:hover': { color: '#007bff' },
                         }}
@@ -80,7 +86,7 @@ function ResponsiveAppBar() {
                             onClick={handleOpenNavMenu}
                             color="inherit"
                         >
-                            <MenuIcon />
+                            <MenuIcon sx={{ color: '#000' }} />
                         </IconButton>
                         <Menu
                             id="menu-appbar"
@@ -99,8 +105,18 @@ function ResponsiveAppBar() {
                             sx={{ display: { xs: 'block', md: 'none' } }}
                         >
                             {pages.map((page, index) => (
-                                <MenuItem key={page} onClick={() => handlePageClick(index)}>
-                                    <Typography sx={{ textAlign: 'center', color: '#333' }}>{page}</Typography>
+                                <MenuItem
+                                    key={page}
+                                    onClick={() => handlePageClick(index)}
+                                    sx={{
+                                        color: isActive(routes[index]) ? 'primary.main' : '#000', // Đổi màu cho trang active
+                                        '&:hover': {
+                                            backgroundColor: 'transparent', // Loại bỏ màu nền khi hover
+                                            color: '#007bff', // Vẫn giữ màu chữ khi hover
+                                        },
+                                    }}
+                                >
+                                    <Typography sx={{ textAlign: 'center' }}>{page}</Typography>
                                 </MenuItem>
                             ))}
                         </Menu>
@@ -109,21 +125,31 @@ function ResponsiveAppBar() {
                     {/* Desktop Menu */}
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {pages.map((page, index) => (
-                            <MenuItem key={page} onClick={() => handlePageClick(index)}>
-                                <Typography sx={{ textAlign: 'center', color: '#fff', '&:hover': { color: '#007bff' } }}>
-                                    {page}
-                                </Typography>
+                            <MenuItem
+                                key={page}
+                                onClick={() => handlePageClick(index)}
+                                sx={{
+                                    color: isActive(routes[index]) ? 'primary.main' : '#000', // Đổi màu cho trang active
+                                    '&:hover': {
+                                        backgroundColor: 'transparent', // Loại bỏ màu nền khi hover
+                                        color: '#007bff', // Vẫn giữ màu chữ khi hover
+                                    },
+                                }}
+                            >
+                                <Typography sx={{ textAlign: 'center' }}>{page}</Typography>
                             </MenuItem>
                         ))}
                     </Box>
 
                     {/* User Menu */}
                     <Box sx={{ flexGrow: 0 }}>
-                        <Tooltip title="Open settings">
-                            <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                <Avatar alt="User Avatar" src="/static/images/avatar/2.jpg" />
-                            </IconButton>
-                        </Tooltip>
+                        {!user ? (
+                            <Tooltip title="Open settings">
+                                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                                    <Avatar alt="User Avatar" src="/static/images/avatar/2.jpg" />
+                                </IconButton>
+                            </Tooltip>
+                        ) : null}
                         <Menu
                             sx={{ mt: '45px' }}
                             id="menu-appbar"
@@ -141,7 +167,7 @@ function ResponsiveAppBar() {
                             onClose={handleCloseUserMenu}
                         >
                             <MenuItem onClick={handleLogout}>
-                                <Typography sx={{ textAlign: 'center', color: '#333' }}>LogOut</Typography>
+                                <Typography sx={{ textAlign: 'center', color: '#000' }}>LogOut</Typography>
                             </MenuItem>
                         </Menu>
                     </Box>
